@@ -1,0 +1,15 @@
+<%= form_with(model: @post, local: true) do |f| %>
+  <div>
+    <%= f.label :title, '名前' %>
+    <%= f.text_field :title %>
+  </div>
+
+  <div>
+    <%= f.label :images, '画像' %>
+    <%= f.file_field :images, multiple: true %>
+  </div>
+
+  <div>
+    <%= f.submit  '投稿する' %>
+  </div>
+<% end %>
