@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
   root "home#top"
+
+  # 画像のアップロード
+  post "posts/upload_image", to: "posts#upload_image"
+
   devise_for :users, controllers: {
     registrations: "users/registrations",
     sessions: "users/sessions",
