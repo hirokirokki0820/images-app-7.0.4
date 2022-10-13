@@ -25,7 +25,6 @@ class PostsController < ApplicationController
   end
 
   def update
-    # @post.images.detach #一旦、全てのimageの紐付けを解除
     if @post.update(post_params)
       redirect_to posts_path, notice: "更新しました"
     else
@@ -50,6 +49,7 @@ class PostsController < ApplicationController
   end
 
   def post_params
+    # params.require(:post).permit(:title, images: [])
     params.require(:post).permit(:title).merge(images: uploaded_images)
   end
 

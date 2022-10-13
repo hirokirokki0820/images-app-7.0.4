@@ -61,7 +61,8 @@ gem "dotenv-rails"
 # fontawesome
 gem "font-awesome-sass", "~> 6.2.0"
 
-
+# rakeタスクを定期的に実行するgem
+gem "whenever", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
