@@ -2,17 +2,38 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="images"
 export default class extends Controller {
-  static targets = ["select", "preview", "image", "image_box"]
+  static targets = ["select", "preview", "image_box", "error"]
 
+  /* プレビュー画像の削除 */
   deleteImage(){
     this.image_boxTarget.remove()
   }
 
+  /* アップロードする画像サイズの上限（5MB）を超えたかどうか判定 */
+  imageSizeOver(file){
+    const fileSize = (file.size)/1000 // ファイルサイズ(KB)
+    if(fileSize > 5000){
+      return true // ファイルサイズが2MBを超えた場合はtrueを返す
+    }else{
+      return false
+    }
+  }
+
   /* 画像選択時の処理 */
   selectImages(){
+    this.errorTarget.textContent = ""
+    const uploadedFilesCount = this.previewTarget.querySelectorAll(".image-box").length
     const files = this.selectTargets[0].files
-    for(const file of files){
-      this.uploadImage(file) // ファイルのアップロード
+    if(files.length + uploadedFilesCount > 10){
+      this.errorTarget.textContent = "画像アップロード上限は最大10枚です。"
+    }else{
+      for(const file of files){
+        if(this.imageSizeOver(file)){
+          this.errorTarget.textContent = "ファイルサイズの上限(1枚あたり5MB)を超えている画像はアップロードできません。"
+        }else{
+          this.uploadImage(file) // ファイルのアップロード
+        }
+      }
     }
     this.selectTarget.value = "" // 選択ファイルのリセット
   }
@@ -40,7 +61,7 @@ export default class extends Controller {
   }
 
   /* 画像プレビュー */
-  previewImage(file, image_id){
+  previewImage(file, id){
     const preview = this.previewTarget
     const fileReader = new FileReader()
     const setAttr = (element, obj)=>{ // 属性設定用の関数
@@ -48,17 +69,15 @@ export default class extends Controller {
         element.setAttribute(key, obj[key])
       })
     }
+    fileReader.readAsDataURL(file) // ファイルをData URIとして読み込む
     fileReader.onload = (function () { // ファイル読み込み時の処理
       const img = new Image()
       const imgBox = document.createElement("div")
       const imgInnerBox = document.createElement("div")
       const deleteBtn = document.createElement("a")
       const hiddenField = document.createElement("input")
-      const imgAttr = { // imgに設定する属性
-        "data-images-target" : "image"
-      }
       const imgBoxAttr = { // imgBoxに設定する属性
-        "class" : "inline-flex mx-1 mb-5",
+        "class" : "image-box inline-flex mx-1 mb-5",
         "data-controller" : "images",
         "data-images-target" : "image_box",
       }
@@ -73,9 +92,8 @@ export default class extends Controller {
         "name" : "post[images][]",
         "style" : "none",
         "type" : "hidden",
-        "value" : image_id,
+        "value" : id, // 受け取った id をセット
       }
-      setAttr(img, imgAttr)
       setAttr(imgBox, imgBoxAttr)
       setAttr(imgInnerBox, imgInnerBoxAttr)
       setAttr(deleteBtn, deleteBtnAttr)
@@ -92,7 +110,19 @@ export default class extends Controller {
 
       preview.appendChild(imgBox)
     })
-    fileReader.readAsDataURL(file)
   }
+
+  // maxImageSize(file){
+  //   const img = new Image()
+  //   img.onload = () => {
+  //     const size = {
+  //       width: img.naturalWidth,
+  //       height: img.naturalHeight
+  //     }
+  //     URL.revokeObjectURL(img.src)
+  //     console.log(size)
+  //   }
+  //   img.src = URL.createObjectURL(file)
+  // }
 
 }

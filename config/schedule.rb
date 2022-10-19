@@ -3,7 +3,7 @@ rails_env = ENV['RAILS_ENV'] || :development
 set :environment, rails_env
 set :output, "#{Rails.root}/log/crontab.log"
 
-every :hour do
+every 1.day, at: ['8:30 am', '5:00 pm'] do
   rake "unattached_images:purge"
 end
 
